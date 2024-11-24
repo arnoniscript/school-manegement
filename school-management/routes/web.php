@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\CourseController;
+use App\Http\Controllers\EnrollmentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,4 +20,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+Route::middleware(['auth'])->group(function () {
+    Route::middleware('admin')->group(function () {
+        Route::resource('students', StudentController::class);
+        Route::resource('courses', CourseController::class);
+        Route::resource('enrollments', EnrollmentController::class);
+    });
+
+    Route::middleware('student')->group(function () {
+        Route::get('courses', [CourseController::class, 'index']);
+        Route::get('enrollments', [EnrollmentController::class, 'index']);
+        Route::post('enrollments', [EnrollmentController::class, 'store']);
+    });
+});
+
+
+require __DIR__ . '/auth.php';
