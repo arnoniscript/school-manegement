@@ -12,7 +12,8 @@ class CourseController extends Controller
      */
     public function index()
     {
-        //
+        $courses = Course::all(); // Recupera todos os cursos
+        return view('courses.index', compact('courses')); // Retorna a view com os cursos
     }
 
     /**
@@ -20,7 +21,7 @@ class CourseController extends Controller
      */
     public function create()
     {
-        //
+        return view('courses.create'); // Retorna o formulário de criação
     }
 
     /**
@@ -28,7 +29,16 @@ class CourseController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'max_students' => 'required|integer|min:1',
+            'final_date' => 'required|date|after:today',
+            'type' => 'required|in:online,presencial',
+        ]);
+
+        Course::create($validated); // Cria o curso com os dados validados
+
+        return redirect()->route('courses.index')->with('success', 'Course created successfully.');
     }
 
     /**
@@ -36,7 +46,7 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        //
+        return view('courses.show', compact('course')); // Retorna a view com os detalhes do curso
     }
 
     /**
@@ -44,7 +54,7 @@ class CourseController extends Controller
      */
     public function edit(Course $course)
     {
-        //
+        return view('courses.edit', compact('course')); // Retorna o formulário de edição
     }
 
     /**
@@ -52,7 +62,16 @@ class CourseController extends Controller
      */
     public function update(Request $request, Course $course)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'max_students' => 'required|integer|min:1',
+            'final_date' => 'required|date|after:today',
+            'type' => 'required|in:online,presencial',
+        ]);
+
+        $course->update($validated); // Atualiza o curso com os dados validados
+
+        return redirect()->route('courses.index')->with('success', 'Course updated successfully.');
     }
 
     /**
@@ -60,6 +79,8 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        //
+        $course->delete(); // Exclui o curso
+
+        return redirect()->route('courses.index')->with('success', 'Course deleted successfully.');
     }
 }

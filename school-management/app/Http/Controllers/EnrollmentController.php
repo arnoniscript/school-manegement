@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Enrollment;
+use App\Models\Student;
+use App\Models\Course;
 use Illuminate\Http\Request;
 
 class EnrollmentController extends Controller
@@ -12,7 +14,8 @@ class EnrollmentController extends Controller
      */
     public function index()
     {
-        //
+        $enrollments = Enrollment::with('student', 'course')->get(); // Carrega matrículas com alunos e cursos relacionados
+        return view('enrollments.index', compact('enrollments')); // Retorna a view com as matrículas
     }
 
     /**
@@ -20,7 +23,9 @@ class EnrollmentController extends Controller
      */
     public function create()
     {
-        //
+        $students = Student::all(); // Carrega todos os alunos
+        $courses = Course::all(); // Carrega todos os cursos
+        return view('enrollments.create', compact('students', 'courses')); // Retorna o formulário de criação
     }
 
     /**
@@ -28,7 +33,15 @@ class EnrollmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'course_id' => 'required|exists:courses,id',
+            'status' => 'required|in:pending,confirmed',
+        ]);
+
+        Enrollment::create($validated); // Cria a matrícula com os dados validados
+
+        return redirect()->route('enrollments.index')->with('success', 'Enrollment created successfully.');
     }
 
     /**
@@ -36,7 +49,7 @@ class EnrollmentController extends Controller
      */
     public function show(Enrollment $enrollment)
     {
-        //
+        return view('enrollments.show', compact('enrollment')); // Retorna a view com os detalhes da matrícula
     }
 
     /**
@@ -44,7 +57,9 @@ class EnrollmentController extends Controller
      */
     public function edit(Enrollment $enrollment)
     {
-        //
+        $students = Student::all(); // Carrega todos os alunos
+        $courses = Course::all(); // Carrega todos os cursos
+        return view('enrollments.edit', compact('enrollment', 'students', 'courses')); // Retorna o formulário de edição
     }
 
     /**
@@ -52,7 +67,15 @@ class EnrollmentController extends Controller
      */
     public function update(Request $request, Enrollment $enrollment)
     {
-        //
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'course_id' => 'required|exists:courses,id',
+            'status' => 'required|in:pending,confirmed',
+        ]);
+
+        $enrollment->update($validated); // Atualiza a matrícula com os dados validados
+
+        return redirect()->route('enrollments.index')->with('success', 'Enrollment updated successfully.');
     }
 
     /**
@@ -60,6 +83,8 @@ class EnrollmentController extends Controller
      */
     public function destroy(Enrollment $enrollment)
     {
-        //
+        $enrollment->delete(); // Exclui a matrícula
+
+        return redirect()->route('enrollments.index')->with('success', 'Enrollment deleted successfully.');
     }
 }

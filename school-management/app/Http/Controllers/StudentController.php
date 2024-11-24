@@ -12,7 +12,8 @@ class StudentController extends Controller
      */
     public function index()
     {
-        //
+        $students = Student::all(); // Recupera todos os alunos
+        return view('students.index', compact('students')); // Retorna a view com os alunos
     }
 
     /**
@@ -20,7 +21,7 @@ class StudentController extends Controller
      */
     public function create()
     {
-        //
+        return view('students.create'); // Retorna o formulário de criação
     }
 
     /**
@@ -28,7 +29,16 @@ class StudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'birth_date' => 'required|date|before:today',
+            'address' => 'required|string|max:500',
+            'email' => 'required|email|unique:students,email',
+        ]);
+
+        Student::create($validated); // Cria o aluno com os dados validados
+
+        return redirect()->route('students.index')->with('success', 'Student created successfully.');
     }
 
     /**
@@ -36,7 +46,7 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        //
+        return view('students.show', compact('student')); // Retorna a view com os detalhes do aluno
     }
 
     /**
@@ -44,7 +54,7 @@ class StudentController extends Controller
      */
     public function edit(Student $student)
     {
-        //
+        return view('students.edit', compact('student')); // Retorna o formulário de edição
     }
 
     /**
@@ -52,7 +62,16 @@ class StudentController extends Controller
      */
     public function update(Request $request, Student $student)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'birth_date' => 'required|date|before:today',
+            'address' => 'required|string|max:500',
+            'email' => 'required|email|unique:students,email,' . $student->id,
+        ]);
+
+        $student->update($validated); // Atualiza os dados do aluno
+
+        return redirect()->route('students.index')->with('success', 'Student updated successfully.');
     }
 
     /**
@@ -60,6 +79,8 @@ class StudentController extends Controller
      */
     public function destroy(Student $student)
     {
-        //
+        $student->delete(); // Exclui o aluno
+
+        return redirect()->route('students.index')->with('success', 'Student deleted successfully.');
     }
 }
